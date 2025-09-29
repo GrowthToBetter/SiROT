@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2 } from "lucide-react";
+import { Send, Bot, User, Loader2, Mic, MicOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChatMessage } from "@/lib/types";
@@ -16,7 +16,7 @@ export default function EduChatbot({ onLocationDetected }: EduChatbotProps) {
     {
       id: "1",
       message:
-        "Halo! Saya asisten virtual untuk edukasi kedaruratan. Anda dapat bertanya tentang mitigasi darurat, prosedur evakuasi, atau persiapan menghadapi keadaan darurat.",
+        "Halo! Saya asisten virtual SiROT untuk edukasi darurat. Anda dapat bertanya tentang mitigasi darurat, prosedur evakuasi, atau persiapan menghadapi keadaan darurat.",
       isBot: true,
       timestamp: new Date(),
     },
@@ -24,7 +24,10 @@ export default function EduChatbot({ onLocationDetected }: EduChatbotProps) {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -33,6 +36,75 @@ export default function EduChatbot({ onLocationDetected }: EduChatbotProps) {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const SpeechRecognition =
+        (window as any).SpeechRecognition ||
+        (window as any).webkitSpeechRecognition;
+
+      if (SpeechRecognition) {
+        setSpeechSupported(true);
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "id-ID"; // Indonesian language
+
+        recognition.onstart = () => {
+          setIsListening(true);
+        };
+
+        recognition.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          setInput(transcript);
+        };
+
+        recognition.onerror = (event: any) => {
+          console.error("Speech recognition error:", event.error);
+          setIsListening(false);
+
+          // Show user-friendly error messages
+          if (
+            event.error === "not-allowed" ||
+            event.error === "permission-denied"
+          ) {
+            alert(
+              "Izin akses microphone ditolak. Mohon izinkan akses microphone di pengaturan browser Anda."
+            );
+          } else if (event.error === "no-speech") {
+            alert("Tidak ada suara yang terdeteksi. Silakan coba lagi.");
+          }
+        };
+
+        recognition.onend = () => {
+          setIsListening(false);
+        };
+
+        recognitionRef.current = recognition;
+      }
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  const toggleSpeechRecognition = () => {
+    if (!recognitionRef.current) return;
+
+    if (isListening) {
+      recognitionRef.current.stop();
+    } else {
+      try {
+        recognitionRef.current.start();
+      } catch (error) {
+        console.error("Error starting speech recognition:", error);
+      }
+    }
+  };
 
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading || isStreaming) return;
@@ -78,18 +150,18 @@ export default function EduChatbot({ onLocationDetected }: EduChatbotProps) {
 
   const handleStreamingResponse = async (messageText: string) => {
     setIsStreaming(true);
-    
+
     // Create initial bot message for streaming
     const botMessageId = (Date.now() + 1).toString();
     let streamedContent = "";
-    
+
     const initialBotMessage: ChatMessage = {
       id: botMessageId,
       message: "",
       isBot: true,
       timestamp: new Date(),
     };
-    
+
     setMessages((prev) => [...prev, initialBotMessage]);
 
     try {
@@ -97,9 +169,9 @@ export default function EduChatbot({ onLocationDetected }: EduChatbotProps) {
         `${process.env.NEXT_PUBLIC_NGROK_URL}/webhook/whatsapp/stream`,
         {
           method: "POST",
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
-            "Accept": "text/plain",
+            Accept: "text/plain",
           },
           body: JSON.stringify({
             MessageSid: `SM${Date.now()}`,
@@ -128,44 +200,44 @@ export default function EduChatbot({ onLocationDetected }: EduChatbotProps) {
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
+        const lines = buffer.split("\n");
         buffer = lines.pop() || "";
 
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
+          if (line.startsWith("data: ")) {
             try {
               const data = JSON.parse(line.slice(6));
-              
-              if (data.type === 'status') {
+
+              if (data.type === "status") {
                 // Show status updates as temporary messages
-                setMessages((prev) => 
-                  prev.map((msg) => 
-                    msg.id === botMessageId 
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === botMessageId
                       ? { ...msg, message: `⏳ ${data.message}` }
                       : msg
                   )
                 );
-              } else if (data.type === 'token') {
+              } else if (data.type === "token") {
                 // Append streaming tokens
                 streamedContent += data.content;
-                setMessages((prev) => 
-                  prev.map((msg) => 
-                    msg.id === botMessageId 
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === botMessageId
                       ? { ...msg, message: streamedContent }
                       : msg
                   )
                 );
-              } else if (data.type === 'report_id') {
+              } else if (data.type === "report_id") {
                 console.log("Report ID:", data.report_id);
-              } else if (data.type === 'complete') {
+              } else if (data.type === "complete") {
                 // Final completion data
                 console.log("Emergency Info:", data.emergency_info);
                 console.log("Final Report ID:", data.report_id);
-              } else if (data.type === 'error') {
+              } else if (data.type === "error") {
                 streamedContent = data.message;
-                setMessages((prev) => 
-                  prev.map((msg) => 
-                    msg.id === botMessageId 
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === botMessageId
                       ? { ...msg, message: streamedContent }
                       : msg
                   )
@@ -181,21 +253,22 @@ export default function EduChatbot({ onLocationDetected }: EduChatbotProps) {
       // Ensure final message is properly set
       if (!streamedContent) {
         streamedContent = "Laporan Anda telah diproses.";
-        setMessages((prev) => 
-          prev.map((msg) => 
-            msg.id === botMessageId 
-              ? { ...msg, message: streamedContent }
-              : msg
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === botMessageId ? { ...msg, message: streamedContent } : msg
           )
         );
       }
-
     } catch (error) {
       console.error("Streaming error:", error);
-      setMessages((prev) => 
-        prev.map((msg) => 
-          msg.id === botMessageId 
-            ? { ...msg, message: "Maaf, terjadi kesalahan dalam streaming. Silakan coba lagi." }
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === botMessageId
+            ? {
+                ...msg,
+                message:
+                  "Maaf, terjadi kesalahan dalam streaming. Silakan coba lagi.",
+              }
             : msg
         )
       );
@@ -232,7 +305,8 @@ export default function EduChatbot({ onLocationDetected }: EduChatbotProps) {
         console.log("Report ID:", jsonResponse.report_id);
       }
     } else if (jsonResponse.status === "error") {
-      botReply = jsonResponse.message || "Terjadi kesalahan dalam memproses laporan.";
+      botReply =
+        jsonResponse.message || "Terjadi kesalahan dalam memproses laporan.";
       console.error("Error:", jsonResponse.error);
     }
 
@@ -255,13 +329,13 @@ export default function EduChatbot({ onLocationDetected }: EduChatbotProps) {
 
   return (
     <div className="disaster-card h-96 flex flex-col">
-      <div className="flex items-center space-x-3 mb-4 pb-3 border-b border-gray-200">
-        <div className="p-2 bg-secondary rounded-full">
+      <div className="flex items-center space-x-3 mb-4 pb-3 border-b border-blue-100">
+        <div className="p-2 bg-blue-600 rounded-full">
           <Bot className="h-5 w-5 text-white" />
         </div>
         <div>
-          <h3 className="font-semibold text-dark">
-            Asisten Edukasi kedaruratan
+          <h3 className="font-semibold text-gray-800">
+            Asisten Edukasi Darurat SiROT
           </h3>
           <p className="text-xs text-gray-600">Selalu siap membantu 24/7</p>
         </div>
@@ -278,20 +352,20 @@ export default function EduChatbot({ onLocationDetected }: EduChatbotProps) {
             <div
               className={`max-w-[80%] p-3 rounded-lg ${
                 message.isBot
-                  ? "bg-gray-100 text-dark"
-                  : "bg-secondary text-white"
+                  ? "bg-blue-50 text-gray-800"
+                  : "bg-blue-600 text-white"
               }`}>
               <div className="flex items-start space-x-2">
                 {message.isBot ? (
-                  <Bot className="h-4 w-4 mt-0.5 text-secondary" />
+                  <Bot className="h-4 w-4 mt-0.5 text-blue-600" />
                 ) : (
                   <User className="h-4 w-4 mt-0.5" />
                 )}
                 <div className="flex-grow">
                   <p className="text-sm">{message.message}</p>
                   {message.detectedLocation && (
-                    <div className="mt-2 p-2 bg-success/10 rounded border border-success/20">
-                      <p className="text-xs text-success font-medium">
+                    <div className="mt-2 p-2 bg-green-50 rounded border border-green-200">
+                      <p className="text-xs text-green-700 font-medium">
                         📍 Lokasi terdeteksi: {message.detectedLocation}
                       </p>
                     </div>
@@ -309,10 +383,10 @@ export default function EduChatbot({ onLocationDetected }: EduChatbotProps) {
         ))}
         {(isLoading || isStreaming) && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 p-3 rounded-lg">
+            <div className="bg-blue-50 p-3 rounded-lg">
               <div className="flex items-center space-x-2">
-                <Bot className="h-4 w-4 text-secondary" />
-                <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+                <Bot className="h-4 w-4 text-blue-600" />
+                <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
                 <span className="text-sm text-gray-600">
                   {isStreaming ? "Memproses..." : "Sedang mengetik..."}
                 </span>
@@ -329,16 +403,34 @@ export default function EduChatbot({ onLocationDetected }: EduChatbotProps) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="Tanyakan tentang mitigasi kedaruratan..."
+          placeholder="Tanyakan tentang mitigasi darurat..."
           disabled={isLoading || isStreaming}
           className="flex-grow"
-          aria-label="Ketik pertanyaan tentang kedaruratann"
+          aria-label="Ketik pertanyaan tentang keadaan darurat"
         />
+        {speechSupported && (
+          <Button
+            onClick={toggleSpeechRecognition}
+            disabled={isLoading || isStreaming}
+            size="sm"
+            className={`px-3 ${
+              isListening
+                ? "bg-red-600 hover:bg-red-700"
+                : "bg-gray-600 hover:bg-gray-700"
+            } text-white`}
+            aria-label={isListening ? "Stop recording" : "Start voice input"}>
+            {isListening ? (
+              <MicOff className="h-4 w-4 animate-pulse" />
+            ) : (
+              <Mic className="h-4 w-4" />
+            )}
+          </Button>
+        )}
         <Button
           onClick={handleSendMessage}
           disabled={!input.trim() || isLoading || isStreaming}
           size="sm"
-          className="disaster-button-primary px-3"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-3"
           aria-label="Kirim pesan">
           <Send className="h-4 w-4" />
         </Button>

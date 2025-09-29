@@ -21,32 +21,32 @@ import dynamic from 'next/dynamic';
 const RealtimeMap = dynamic(() => import("@/components/RealtimeMap"), { ssr: false });
 const menuItems = [
   {
-    title: 'Laporan Kedaruratan',
-    description: 'Laporkan kejadian Kedaruraratan dengan sistem NLP otomatis',
+    title: 'Laporan Darurat',
+    description: 'Laporkan kejadian darurat dengan sistem NLP otomatis',
     icon: FileText,
     href: '/laporan',
-    color: 'bg-blue-500',
+    color: 'bg-blue-600',
   },
   {
-    title: 'Edukasi Kedaruratan',
-    description: 'Pelajari mitigasi kedaruratan dengan AI chatbot interaktif',
+    title: 'Edukasi Darurat',
+    description: 'Pelajari mitigasi darurat dengan AI chatbot interaktif',
     icon: BookOpen,
     href: '/edukasi',
-    color: 'bg-green-500',
+    color: 'bg-cyan-600',
   },
   {
     title: 'Regulasi',
     description: 'Cari dokumen hukum dan SOP dengan pencarian cerdas',
     icon: Scale,
     href: '/regulasi',
-    color: 'bg-purple-500',
+    color: 'bg-indigo-600',
   },
   {
     title: 'Kontak Darurat',
     description: 'Akses cepat nomor telepon dan layanan darurat',
     icon: Phone,
     href: '/kontak-darurat',
-    color: 'bg-red-500',
+    color: 'bg-red-600',
   },
 ];
 
@@ -85,25 +85,25 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-secondary via-secondary/90 to-secondary/80 text-white py-20">
+      <section className="relative bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white py-20">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              Sistem Integrasi NLP
-              <span className="block text-white/90 text-3xl md:text-5xl">
-                Regulasi & Edukasi Kedaruratan
+              SiROT
+              <span className="block text-white/95 text-3xl md:text-5xl mt-2">
+                Sistem Informasi Respon Darurat
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto">
-              Platform cerdas untuk pelaporan kedaruratan otomatis, edukasi masyarakat, 
+              Platform cerdas untuk pelaporan darurat otomatis, edukasi masyarakat, 
               dan pencarian regulasi menggunakan teknologi AI
             </p>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
               <Link href="/laporan">
-                <Button size="lg" className="bg-white text-secondary hover:bg-gray-100 text-lg px-8 py-3">
+                <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-3">
                   Laporkan Keadaan Darurat
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
@@ -112,7 +112,7 @@ export default function HomePage() {
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="border-white text-white hover:bg-white bg-secondary hover:text-secondary text-lg px-8 py-3"
+                  className="border-white text-white hover:bg-white bg-blue-600 hover:text-blue-600 text-lg px-8 py-3"
                 >
                   Pelajari Mitigasi
                 </Button>
@@ -129,7 +129,7 @@ export default function HomePage() {
             <CardStat
               title="Total Laporan"
               value={stats.totalReports}
-              description="Laporan kedaruratan tercatat"
+              description="Laporan darurat tercatat"
               icon={FileText}
               trend={{ value: 12, isPositive: true }}
             />
@@ -159,12 +159,12 @@ export default function HomePage() {
         {/* Menu Cards Section */}
         <section className="mb-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-dark mb-4">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">
               Layanan Utama
             </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
               Pilih layanan yang Anda butuhkan untuk mendapatkan informasi 
-              atau melaporkan kejadian kedaruratan
+              atau melaporkan kejadian darurat
             </p>
           </div>
 
@@ -175,13 +175,13 @@ export default function HomePage() {
                   <div className={`p-3 rounded-lg ${item.color} mb-4 w-fit`}>
                     <item.icon className="h-6 w-6 text-white" />
                   </div>
-                  <h3 className="font-semibold text-dark mb-2 group-hover:text-secondary transition-colors duration-200">
+                  <h3 className="font-semibold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors duration-200">
                     {item.title}
                   </h3>
                   <p className="text-sm text-gray-600 mb-4">
                     {item.description}
                   </p>
-                  <div className="flex items-center text-secondary group-hover:text-secondary/80 transition-colors duration-200">
+                  <div className="flex items-center text-blue-600 group-hover:text-blue-700 transition-colors duration-200">
                     <span className="text-sm font-medium">Akses Sekarang</span>
                     <ArrowRight className="ml-1 h-4 w-4" />
                   </div>
@@ -196,11 +196,11 @@ export default function HomePage() {
           <div className="disaster-card">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-2xl font-bold text-dark mb-2">
-                  Peta Real-time Kedaruratan
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                  Peta Real-time Darurat
                 </h2>
                 <p className="text-gray-600">
-                  Monitoring kejadian kedaruratan di seluruh Indonesia secara langsung
+                  Monitoring kejadian darurat di seluruh Indonesia secara langsung
                 </p>
               </div>
               <div className="flex items-center space-x-2">
@@ -216,12 +216,12 @@ export default function HomePage() {
         <section className="mb-16">
           <div className="disaster-card">
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-dark mb-4">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">
                 Teknologi NLP untuk Otomatisasi
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
                 Sistem kami menggunakan teknologi Natural Language Processing 
-                untuk menganalisis dan memproses laporan kedaruratan secara otomatis
+                untuk menganalisis dan memproses laporan darurat secara otomatis
               </p>
             </div>
             <NLPExtractionSteps />
@@ -230,16 +230,16 @@ export default function HomePage() {
 
         {/* CTA Section */}
         <section className="text-center">
-          <div className="bg-gradient-to-r from-secondary to-secondary/80 rounded-2xl p-8 md:p-12 text-white">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 md:p-12 text-white">
             <h2 className="text-3xl font-bold mb-4">
-              Siap Melaporkan kedaruratan?
+              Siap Melaporkan Keadaan Darurat?
             </h2>
             <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
               Sistem AI kami akan membantu memproses laporan Anda dengan cepat 
               dan mengirim notifikasi ke instansi terkait
             </p>
             <Link href="/laporan">
-              <Button size="lg" className="bg-white text-secondary hover:bg-gray-100 text-lg px-8 py-3">
+              <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-3">
                 Mulai Pelaporan
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>

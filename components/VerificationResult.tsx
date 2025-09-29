@@ -100,7 +100,7 @@ export default function VerificationResult({
       <div className="bg-error/10 border border-error/20 rounded-lg p-4">
         <h4 className="font-medium text-dark mb-2">Kemungkinan Masalah:</h4>
         <ul className="text-sm text-gray-700 space-y-1">
-          <li>• Lokasi tidak dapat diverifikasi dengan database BPBD</li>
+          <li>• Lokasi tidak dapat diverifikasi dengan database</li>
           <li>• Informasi laporan kurang lengkap</li>
           <li>• Koordinat tidak sesuai dengan lokasi yang disebutkan</li>
         </ul>

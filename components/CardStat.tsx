@@ -26,7 +26,7 @@ export default function CardStat({
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-          <p className="text-2xl font-bold text-dark mb-1">{value}</p>
+          <p className="text-2xl font-bold text-gray-800 mb-1">{value}</p>
           {description && (
             <p className="text-sm text-gray-500">{description}</p>
           )}
@@ -35,7 +35,7 @@ export default function CardStat({
               <span
                 className={cn(
                   'text-xs font-medium',
-                  trend.isPositive ? 'text-success' : 'text-error'
+                  trend.isPositive ? 'text-green-600' : 'text-red-600'
                 )}
               >
                 {trend.isPositive ? '+' : ''}{trend.value}%
@@ -44,8 +44,8 @@ export default function CardStat({
             </div>
           )}
         </div>
-        <div className="p-3 bg-secondary/10 rounded-lg group-hover:bg-secondary/20 transition-colors duration-200">
-          <Icon className="h-6 w-6 text-secondary" />
+        <div className="p-3 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors duration-200">
+          <Icon className="h-6 w-6 text-blue-600" />
         </div>
       </div>
     </div>

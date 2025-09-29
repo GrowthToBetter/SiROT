@@ -125,14 +125,14 @@ const handleNLPComplete = async () => {
                       isCompleted
                         ? "bg-success text-white"
                         : isActive
-                        ? "bg-secondary text-white"
+                        ? "bg-blue-600 text-white"
                         : "bg-gray-200 text-gray-600"
                     }`}>
                     {index + 1}
                   </div>
                   <span
                     className={`ml-2 text-sm font-medium ${
-                      isActive ? "text-secondary" : "text-gray-600"
+                      isActive ? "text-blue-600" : "text-gray-600"
                     }`}>
                     {step}
                   </span>
